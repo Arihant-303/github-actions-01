@@ -1,0 +1,63 @@
+name: ML Pipeline
+
+on: [push, pull_request]
+
+jobs:
+
+  development:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Train Model
+      run: python src/train.py
+
+
+  test:
+    needs: development
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Evaluate Model
+      run: python src/evaluate.py
+
+
+  streamlit-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Deploy on Streamlit
+      run: |
+        streamlit run streamlit_app.py &
+        sleep 5
